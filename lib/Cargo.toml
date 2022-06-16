@@ -1,0 +1,11 @@
+[package]
+name = "reference-value-provider-service"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+anyhow = "1.0.57"
+in-totolib-rs = { git = "https://github.com/Xynnn007/in-totolib-rs" }
+serde_json = "1.0.81"
