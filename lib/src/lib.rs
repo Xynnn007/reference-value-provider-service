@@ -144,7 +144,7 @@ mod test {
         parameters.insert("line_normalization".to_string(), "true".to_string());
         
         match extractors.handle_provenance(
-            "in_toto".to_string(), 
+            "in-toto".to_string(), 
             "foo.tar.gz".to_string(), 
             "".to_string(), 
             parameters,

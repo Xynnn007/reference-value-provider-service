@@ -9,3 +9,6 @@ edition = "2021"
 anyhow = "1.0.57"
 in-totolib-rs = { git = "https://github.com/Xynnn007/in-totolib-rs" }
 serde_json = "1.0.81"
+
+[features]
+in-toto = []

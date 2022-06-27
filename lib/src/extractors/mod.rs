@@ -5,7 +5,7 @@
 
 // Add your specific provenance declaration here.
 // For example: "pub mod in_toto;"
-// #[cfg(feature = "in_toto")]
+#[cfg(feature = "in-toto")]
 pub mod in_toto;
 
 use anyhow::*;
@@ -31,12 +31,12 @@ impl ExtractorModuleList {
     pub fn new() -> ExtractorModuleList {
         let mut mod_list = HashMap::new();
 
-        // #[cfg(feature = "in_toto")]
+        #[cfg(feature = "in-toto")]
         {
             let instantiate_func: ExtractorInstantiateFunc = Box::new(|| -> ExtractorInstance {
                 Box::new(in_toto::InTotoExtractor::new())
             });
-            mod_list.insert("in_toto".to_string(), instantiate_func);
+            mod_list.insert("in-toto".to_string(), instantiate_func);
         }
 
         ExtractorModuleList { mod_list }
