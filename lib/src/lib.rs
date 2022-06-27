@@ -12,6 +12,15 @@ mod extractors;
 
 static WORKING_DIR_KEY: &str = "working_dir";
 
+/// `Extractors` is the core module of Reference Value Providing Service
+/// (RVPS for short). It provides different kinds of `Extractor`s due to
+/// different provenance types, e.g. in-toto, etc.
+/// Each `Extractor` will process the input provenance, verify the 
+/// validation of the provenance, and then extract the formatted 
+/// reference value (degest, s.t. hash value and name of the artifact) 
+/// from the provenance. If the verification fails, no reference value 
+/// will be extracted. 
+
 /// Define an universal Reference Value
 #[derive(PartialEq)]
 pub struct ReferenceValue {
@@ -19,11 +28,23 @@ pub struct ReferenceValue {
     hash_value: String,
 }
 
-/// `ExtratorsAPI` defines the interfaces of Extractor, s.t. the core 
-/// componant of Reference Value Providing Service. 
-/// 
-/// 
+/// `ExtratorsAPI` defines the interfaces of Extractors.
 pub trait ExtratorsAPI {
+    /// Handle the provenance, e.g. verifying and extracting.
+    /// * `provenance_type` indicates the type of the provenance, e.g.
+    /// `in-toto`.
+    /// * `provenance_name` is the artifact's name, which will be 
+    /// included in the outcome `ReferenceValue` struct.
+    /// * `provenance` is the content of provenance file.
+    /// * `parameters` is a k-v map. It is useful when many extra
+    /// parameters are needed when processing provenance. Dfferent 
+    /// provenance has different format. For example,
+    /// in in-toto, provenance files include linkfiles, layoutfile and
+    /// public key files. It is hard to be included all of them in 
+    /// parameter `provenance`. However, if we store some strings 
+    /// that indicate the paths for the files, it will be easy to
+    /// handle, because all in-toto provenance has layout, linkfile and
+    /// pubkeys. 
     fn handle_provenance(
         &mut self,
         provenance_type: String,
@@ -33,6 +54,13 @@ pub trait ExtratorsAPI {
     ) -> Result<ReferenceValue>;
 }
 
+/// The struct `Extractors` is responsible for implementing
+/// trait `Extrators`.
+/// `extractors_module_list` is a map that maps provenance type
+/// (in String) to its Extractor's instancializer.
+/// `extractors_instance_map` is another map that maps provenance type
+/// to the instancialized Extractor. The two map implement a 
+/// "instance-on-demand" mechanism.
 pub struct Extrators {
     extractors_module_list: ExtractorModuleList,
     extractors_instance_map: HashMap<String, ExtractorInstance>,
@@ -54,10 +82,14 @@ impl Extrators {
         }
     }
 
+    /// Register an `Extractor` instance to `Extractors`. The `Extractor` is responsible for 
+    /// handling specific kind of provenance (as `extractor_name` indicates).
     fn register_instance(&mut self, extractor_name: String, extractor_instance: ExtractorInstance) {
         self.extractors_instance_map.insert(extractor_name, extractor_instance);
     }
 
+    /// Instantiate an `Extractor` of given type `extractor_name`. This method will
+    /// instantiate an `Extractor` instance and then register it.
     fn instantiate_extractor(&mut self, extractor_name: String) -> Result<()> {
         let instantiate_func = self.extractors_module_list.get_func(&extractor_name)?;
         let extractor_instance = (instantiate_func)();
@@ -67,6 +99,13 @@ impl Extrators {
 }
 
 impl ExtratorsAPI for Extrators {
+    /// Process the input provenance, verify its authenticity, and
+    /// output the reference value if the verification succeeds.
+    /// * `provenance_type` is the type of the provenance, e.g. "in-toto".
+    /// * `provenance_name` is the artifact's name, e.g. "kata-agent".
+    /// * `provenance` is the content of provenance (if needed).
+    /// * `parameters` is the parameters for Extractor to handle the 
+    /// given provenance.
     fn handle_provenance(
         &mut self,
         provenance_type: String,
