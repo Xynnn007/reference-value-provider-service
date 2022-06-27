@@ -11,4 +11,6 @@ in-totolib-rs = { git = "https://github.com/Xynnn007/in-totolib-rs" }
 serde_json = "1.0.81"
 
 [features]
+default = [ "full" ]
+full = [ "in-toto" ]
 in-toto = []
