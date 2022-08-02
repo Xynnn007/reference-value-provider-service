@@ -57,7 +57,7 @@ pub trait RVPSAPI {
 pub struct Core<T: Cache> {
     pre_processor: PreProcessor,
     extractors: Extractors,
-    cache: T,
+    cache: Box<T>,
 }
 
 impl<T: Cache> Core<T> {
@@ -70,7 +70,7 @@ impl<T: Cache> Core<T> {
         Core {
             pre_processor,
             extractors,
-            cache,
+            cache: Box::new(cache),
         }
     }
 

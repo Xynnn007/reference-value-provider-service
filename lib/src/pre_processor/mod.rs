@@ -17,7 +17,7 @@ use anyhow::*;
 /// through the Pre-Processor. A series of Wares organized in order can
 /// process all the messages in need before they are consumed by the
 /// Extractors.
-pub trait Ware {
+pub trait Ware: Sync + Send {
     fn handle(
         &self,
         message: &mut Message,
